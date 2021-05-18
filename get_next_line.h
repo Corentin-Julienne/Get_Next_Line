@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/04 17:50:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2021/05/13 17:42:30 by cjulienn         ###   ########.fr       */
+/*   Updated: 2021/05/18 13:39:00 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,5 +23,12 @@
 int		get_next_line(int fd, char **line);
 size_t	ft_strlen(const char *str);
 char	*ft_strjoin(char const *s1, char const *s2);
+char	*ft_strchr(const char *str, int c);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
+
+// temporary protos
+
+// static int	ft_ln_checker(char *stc_line, char *temp, int fd);
+int	ft_gnl_output(char **temp, char *stc_line);
 
 #endif
