@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/04 17:50:55 by cjulienn          #+#    #+#             */
-/*   Updated: 2021/05/18 16:55:20 by cjulienn         ###   ########.fr       */
+/*   Updated: 2021/05/19 19:41:31 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,33 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 
+void		*ft_memset(void *b, int c, size_t len)
+{
+	unsigned	char	*ub;
+
+	ub = (unsigned char *)b;
+	while (len > 0)
+	{
+		*ub = c;
+		len--;
+		ub++;
+	}
+	return (b);
+}
+
+int			ft_memdel(void **ptr)
+{
+	if (*ptr)
+	{
+		ft_memset(*ptr, 0, ft_strlen(*ptr));
+		free(*ptr);
+		*ptr = NULL;
+		return (1);
+	}
+	return (0);
+}
 
 size_t	ft_strlen(const char *str)
 {
@@ -122,7 +148,7 @@ return 1 si \n atteint (il reste des lignes dans le fichier)
 !! cut le \n si présent
 !! stop si le temp_size est atteint
 
-du coup on arrête gnl si on atteint le temp ou un \n (a la premiere condition remplie)
+du coup on arrête gnl si on atteint le buffer ou un \n (a la premiere condition remplie)
 
 */
 
@@ -131,24 +157,24 @@ du coup on arrête gnl si on atteint le temp ou un \n (a la premiere condition r
 pseudo code :
 
 1) intialiser variable static char *stc_line == NULL;
-2) intialiser variable char *temp (array temporaire)
+2) intialiser variable char *buffer (array temporaire)
 3) créer variable reader type ssize_t pour contenir le return des differentes lectures.
 
-4) malloquer cet array temporaire avec temp = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))
+4) malloquer cet array temporaire avec buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))
 5) tant que l'on ne rencontre pas de \n ou de EOF, lire avec read en boucle dans la limit du 
 BUFFER_SIZE (stocker dans variable read de type ssize_t)
- 	=> si read < 0 on va free temp et return -1 (couille)
- 	=> sinon join temp à stc_line;
+ 	=> si read < 0 on va free buffer et return -1 (couille)
+ 	=> sinon join buffer à stc_line;
 6) deux possibilités : on atteint le EOF ou on rencontre un \n :
 	=> on rencontre un \n : point |7|
 	=> on recontre un EOF : point |8|
 7) suivre ces étapes :
-	=> join temp à stc_line sans le \n et ce qui suit après
-	=> free temp
+	=> join buffer à stc_line sans le \n et ce qui suit après
+	=> free buffer
 	=> retourner 1
 8) suivre ces étapes :
-	=> join temp à stc_line, '\0' compris
-	=> free temp
+	=> join buffer à stc_line, '\0' compris
+	=> free buffer
 	=> retourner 0
 
 !!!!! il faudra aussi penser à calculer ou on en est (quelle ligne) => variable static size_t ?
@@ -157,29 +183,45 @@ BUFFER_SIZE (stocker dans variable read de type ssize_t)
 
 */
 
-// static int	ft_ln_checker(char *stc_line, char *temp, int fd) // check le num de lignes
+// static int	ft_ln_checker(char *stc_line, char *buffer, int fd) // check le num de lignes
 // {
 // 	// TODO
 // }
 
-int	ft_gnl_output(char **temp, char *stc_line)
-{	
-	if (ft_strchr(stc_line, '\n')) // cas \n
+char	*ft_trim_bfr_ln(const char *stc_line)
+{
+	char	*relic;
+
+	if (!stc_line)
+		return (NULL);
+	relic = (char *)stc_line;
+	while (relic[0])
 	{
-		
-		// *temp = ft_substr(*temp, 0, ft_strlen(ft_strchr(*temp, '\n')));
-		// ft_strjoin(stc_line, *temp);
-		// free(*temp);
-		(void)temp;
-		printf("%s",stc_line);
+		if (relic[0] != '\n')
+		{
+			relic++;
+			printf("%s\n", relic);
+		}
+		if (ft_strlen(relic) > 1)
+			relic++;
+		else
+			return (NULL);
+	}
+	return (relic);
+}
+
+int	ft_gnl_output(char *stc_line, char **line)
+{	
+	if (ft_strchr(stc_line, '\n') != NULL) // cas \n
+	{
+		*line = strdup(ft_substr(stc_line, 0, (ft_strchr(stc_line, '\n') - stc_line))); 
+		// check line before (do not merely copy, understand)
 		return (1);
 	}
-	else if (ft_strchr(stc_line, '\0')) // cas EOF 
+	else if (ft_strchr(stc_line, '\0') != NULL) // cas EOF 
 	{
-		// ft_strjoin(stc_line, *temp);
-		// free(*temp);
+		*line = strdup(stc_line);
 		return (0);
-		printf("%s",stc_line);
 	}
 	else
 		return (-1);
@@ -188,36 +230,40 @@ int	ft_gnl_output(char **temp, char *stc_line)
 int	get_next_line(int fd, char **line) // WIP
 {
 	static char		*stc_line = NULL;
+	char			*buffer;
 	char			*temp;
+	char			*relic;
 	ssize_t			reader;
-	size_t i;
 
-	if (fd < 0 || line == NULL || BUFFER_SIZE <= 0) // OK
+	if (fd < 0 || BUFFER_SIZE <= 0) // OK voir si rajouter !line
 		return (-1);
-	temp = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1)); // OK
-	if (!temp)
-		return (-1); // protection OK
-	while (!ft_strchr(stc_line, '\n') 
-		&& (reader = read(fd, temp, BUFFER_SIZE) > 0)) // good : check if \n or EOF
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (-1);
+	relic = ft_trim_bfr_ln(stc_line);
+	printf("%s\n", relic);
+	if (stc_line != NULL && relic == NULL)
 	{
-		if (reader < 0) // if couille free et return -1
-		{
-			free(temp);
-			return (-1);
-		}
-		temp[reader] = '\0'; //finishing the temp by \0;
-		// printf("%s\n", temp); // to suppress after
-		if (!stc_line)
-			stc_line = ft_strjoin("", temp);
-		else
-			stc_line = ft_strjoin(stc_line, temp);
-		if (!stc_line)
-			return (-1);
-		printf("%s", stc_line); // to suppress after
-		// change *line;
-		i = 0;
+		free(stc_line);
+		stc_line = strdup("");
+	}	
+	else if (relic)
+	{
+		stc_line = strdup(relic);
+	}	
+	else
+		stc_line = strdup("");
+	while (!ft_strchr(stc_line, '\n') 
+		&& ((reader = read(fd, buffer, BUFFER_SIZE)) > 0)) // good : check if \n or EOF
+	{
+		buffer[reader] = '\0'; //finishing the buffer by \0;
+		temp = ft_strjoin(stc_line, buffer);
+		free(stc_line);
+		stc_line = strdup(temp);
+		free(temp);
 	}
-	return (ft_gnl_output(&temp, stc_line));
+	free(buffer);
+	return (ft_gnl_output(stc_line, line));
 }
 
 int		main(void)
@@ -225,14 +271,11 @@ int		main(void)
 	char	*line;
 	int		nb_line;
 	int		fd;
-	char	*url;
-
-	url = "baudelaire.txt";
 	// int		fd2;
 	// int		fd3;
 
 	nb_line = 1;
-	if ((fd = open(url, O_RDONLY)) == -1)
+	if ((fd = open("./baudelaire.txt", O_RDONLY)) == -1)
 		printf("le fichier n'existe pas.");
 	// if ((fd2 = open(av[2], O_RDONLY)) == -1)
 	// 	printf("le fichier n'existe pas.");
@@ -240,10 +283,10 @@ int		main(void)
 	// 	printf("le fichier n'existe pas.");
 	line = NULL;
 	int ret = 0;
-	while ((ret = get_next_line(fd, &line)) > 0 && nb_line)
+	while ((ret = get_next_line(fd, &line)) > 0 && nb_line < 10)
 	{
 		printf("line[%d]: %s\n", nb_line, line);
-		// free(line);
+		free(line);
 		// line = NULL;
 		// ret = get_next_line(fd2, &line);
 		// printf("line[%d]: %s\n", nb_line, line);
@@ -255,7 +298,7 @@ int		main(void)
 		nb_line++;
 	}
 	printf("line[%d]: %s\n", nb_line, line);
-	// free(line);
+	free(line);
 	// line = NULL;
 	// ret = get_next_line(fd2, &line);
 	// printf("line[%d]: %s\n", nb_line, line);
@@ -264,5 +307,5 @@ int		main(void)
 	// ret = get_next_line(fd3, &line);
 	// printf("line[%d]: %s\n", nb_line, line);
 	// free(line);
-	// system("leaks a.out");
+	system("leaks a.out");
 }
