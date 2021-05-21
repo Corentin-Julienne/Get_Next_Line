@@ -6,11 +6,14 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/04 17:50:51 by cjulienn          #+#    #+#             */
-/*   Updated: 2021/05/14 15:26:02 by cjulienn         ###   ########.fr       */
+/*   Updated: 2021/05/21 13:51:18 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+// complete file : 5 fonctions including strjoin, strdup, 
+// strlen, substr et strchr
 
 size_t	ft_strlen(const char *str)
 {
@@ -99,5 +102,25 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 		len--;
 	}
 	copy[iter] = '\0';
+	return (copy);
+}
+
+char	*ft_strdup(const char *str)
+{
+	char				*copy;
+	unsigned long		sizer;
+	int					i;
+
+	sizer = ft_strlen(str) + 1;
+	copy = malloc(sizer * (sizeof(char)));
+	if (!(copy))
+		return (NULL);
+	i = 0;
+	while (str[i] != '\0')
+	{
+		copy[i] = str[i];
+		i++;
+	}
+	copy[i] = '\0';
 	return (copy);
 }

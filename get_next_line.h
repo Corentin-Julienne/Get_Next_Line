@@ -6,7 +6,7 @@
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/04 17:50:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2021/05/18 13:39:00 by cjulienn         ###   ########.fr       */
+/*   Updated: 2021/05/19 18:09:07 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,6 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 // temporary protos
 
 // static int	ft_ln_checker(char *stc_line, char *temp, int fd);
-int	ft_gnl_output(char **temp, char *stc_line);
+int	ft_gnl_output(char *stc_line, char **line);
 
 #endif
