@@ -5,31 +5,30 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: cjulienn <cjulienn@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/05/04 17:50:58 by cjulienn          #+#    #+#             */
-/*   Updated: 2021/05/25 14:34:19 by cjulienn         ###   ########.fr       */
+/*   Created: 2021/07/19 13:28:47 by cjulienn          #+#    #+#             */
+/*   Updated: 2021/08/05 13:43:49 by cjulienn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 1
-#endif
+# ifndef	BUFFER_SIZE
+#  define BUFFER_SIZE 32
+# endif
 
 # include <stdlib.h>
 # include <unistd.h>
-// # include "wraloc.h"
 
-int		get_next_line(int fd, char **line);
+char	*get_next_line(int fd);
+char	*manage_errors(int fd);
+char	*ft_output(ssize_t reader, char	**line, int iter);
+char	*ft_cut_rtn(const char *line);
+char	*ft_cut_line(ssize_t reader, char *line);
+char	*ft_strjoin_and_free(const char *s1, const char *s2);
+char	*ft_strchr(const char *s, int c);
+char	*ft_protec_strdup(const char *str);
+char	*ft_free_and_return(char **buffer, char *rtn_value);
 size_t	ft_strlen(const char *str);
-char	*ft_strjoin(char const *s1, char const *s2);
-char	*ft_strchr(const char *str, int c);
-char	*ft_substr(char const *s, unsigned int start, size_t len);
-
-// temporary protos
-
-// static int	ft_ln_checker(char *stc_line, char *temp, int fd);
-int	ft_gnl_output(char *stc_line, char **line);
 
 #endif
